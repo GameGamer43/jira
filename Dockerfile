@@ -3,7 +3,7 @@ MAINTAINER Steffen Bleul <sbl@blacklabelops.com>
 
 # Note that you also need to update buildscripts/release.sh when the
 # Jira version changes
-ARG JIRA_VERSION=7.8.0
+ARG JIRA_VERSION=7.2.0
 ARG JIRA_PRODUCT=jira-software
 # Permissions, set the linux user id and group id
 ARG CONTAINER_UID=1000
@@ -21,6 +21,7 @@ ENV JIRA_USER=jira                            \
     JIRA_INSTALL=/opt/jira                    \
     JIRA_SCRIPTS=/usr/local/share/atlassian   \
     MYSQL_DRIVER_VERSION=5.1.44               \
+    POSTGRESQL_DRIVER_VERSION=42.2.2					\
     DOCKERIZE_VERSION=v0.4.0
 ENV JAVA_HOME=$JIRA_INSTALL/jre
 
@@ -89,6 +90,8 @@ RUN apk add --update                                    \
     keytool -trustcacerts -keystore $KEYSTORE -storepass changeit -noprompt -importcert -alias letsencryptauthorityx4 -file /tmp/lets-encrypt-x4-cross-signed.der && \
     # Install atlassian ssl tool
     wget -O /home/${JIRA_USER}/SSLPoke.class https://confluence.atlassian.com/kb/files/779355358/779355357/1/1441897666313/SSLPoke.class && \
+    # Update JBDC for PostgreSQL since it's broken for JIRA 7.2.0
+    wget -O ${JIRA_INSTALL}/lib/postgresql-9.1-903.jdbc4-atlassian-hosted.jar https://jdbc.postgresql.org/download/postgresql-${POSTGRESQL_DRIVER_VERSION}.jar && \
     # Set permissions
     chown -R $JIRA_USER:$JIRA_GROUP ${JIRA_HOME}    &&  \
     chown -R $JIRA_USER:$JIRA_GROUP ${JIRA_INSTALL} &&  \
